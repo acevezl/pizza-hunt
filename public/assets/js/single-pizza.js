@@ -9,6 +9,29 @@ const $newCommentForm = document.querySelector('#new-comment-form');
 
 let pizzaId;
 
+function getPizza() {
+  // get pizza id from the URL parameter
+  const searchParams = new URLSearchParams(document.location.search.substring(1));
+  const pizzaId = searchParams.get('id');
+
+  // get pizzaInfo
+  fetch(`/api/pizzas/${pizzaId}`)
+    .then(response => {
+      // check for a 4xx or 5xx error from server, if so throw an error
+      if (!response.ok) {
+        console.log(response);
+        throw new Error({ message: 'Something went wront, see reponse details above'});
+      }
+      return response.json();
+    })
+    .then(printPizza)
+    .catch(err => {
+      console.log(err);
+      alert('Cannot find a pizza with this ide! Taking you back to previous page...');
+      window.history.back();
+    });
+}
+
 function printPizza(pizzaData) {
   console.log(pizzaData);
 
@@ -87,6 +110,30 @@ function handleNewCommentSubmit(event) {
   }
 
   const formData = { commentBody, writtenBy };
+
+  // post the comment to server
+  fetch(`/api/comments/${pizzaId}`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(formData)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`Something went wrong, can't save comment`);
+    }
+    response.json();
+  })
+  .then(commentResponse => {
+    console.log(commentResponse);
+    location.reload();
+  })
+  .catch(err => {
+    console.log(err);
+  });
+
 }
 
 function handleNewReplySubmit(event) {
@@ -106,6 +153,30 @@ function handleNewReplySubmit(event) {
   }
 
   const formData = { writtenBy, replyBody };
+
+  // submit reply
+  fetch(`/api/comments/${pizzaId}/${commentId}`, {
+    method: 'PUT',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(formData)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`Something went wrong, can't save reply to comment`);
+    }
+    response.json();
+  })
+  .then(replyResponse => {
+    console.log(replyResponse);
+    location.reload();
+  })
+  .catch(err => {
+    console.log(err);
+  });
+    
 }
 
 $backBtn.addEventListener('click', function() {
@@ -114,3 +185,5 @@ $backBtn.addEventListener('click', function() {
 
 $newCommentForm.addEventListener('submit', handleNewCommentSubmit);
 $commentSection.addEventListener('submit', handleNewReplySubmit);
+
+getPizza();
