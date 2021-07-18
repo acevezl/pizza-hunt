@@ -7,10 +7,13 @@ const ReplySchema = new Schema({
         default: () => new Types.ObjectId()
     },
     replyBody: {
-        type: String
+        type: String,
+        required: true,
+        trim: truehero
     },
     writtenBy: {
-        type: String
+        type: String,
+        required: true
     },
     createdAt: {
         type: Date,
