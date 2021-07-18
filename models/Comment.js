@@ -9,7 +9,7 @@ const ReplySchema = new Schema({
     replyBody: {
         type: String,
         required: true,
-        trim: truehero
+        trim: true
     },
     writtenBy: {
         type: String,
